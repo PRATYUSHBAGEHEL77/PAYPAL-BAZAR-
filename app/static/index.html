@@ -123,145 +123,6 @@ footer{margin-top:75px;padding-top:24px;color:#74889e;border-color:#dce8f3}.quic
 @media(max-width:760px){.shell{padding:16px 16px 44px}.top{padding-bottom:15px}.quick-nav{background:#fff;border:1px solid #dce9f6;box-shadow:0 14px 35px #143b5b15}.quick-nav a{color:#31516f}.hero{padding:72px 0 42px;min-height:0}.hero h1{font-size:clamp(48px,13vw,72px);letter-spacing:-.07em;line-height:.97}.hero h1:after{height:5px;margin-top:19px}.hero p{font-size:15px;max-width:92%}.ambient-visual{right:-150px;top:18vh;width:350px;height:350px;opacity:.13}.grid{grid-template-columns:1fr;gap:15px}.panel{border-radius:23px;padding:21px}.mic-area{min-height:245px}.market-dashboard{margin-top:65px;padding-top:38px}.market-grid{grid-template-columns:1fr}.dashboard-heading h2,.inventory-head h2{font-size:32px}.activity-row{grid-template-columns:34px minmax(0,1fr) auto}.activity-row time{display:none}.activity-status{grid-column:auto}.seller-quote{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.ambient-visual,.hero:before,.hero h1,.hero p,.panel,.market-card{animation:none!important;transition:none!important}}
 </style>
-<style id="editorial-paypal-bazaar-redesign">
-/* ===== PayPal Voice Bazaar · editorial landing-page redesign ===== */
-:root{
-  color-scheme:light;
-  --navy:#111827;--blue:#0870ba;--cyan:#43b8e8;--muted:#6b7280;
-  --bg:#fff;--line:#e5e7eb;--white:#fff;--green:#087fba;
-  --red:#c74450;--shadow:0 12px 34px rgba(17,24,39,.07)
-}
-html,body{background:#fff!important;color:#111!important}
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;overflow-x:hidden}
-body:before,body:after,.ambient-visual{display:none!important}
-.shell{
-  width:min(1440px,100%);max-width:none;margin:0 auto;
-  padding:26px clamp(22px,5.2vw,84px) 0;
-  display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
-  grid-template-areas:"nav nav" "hero app" "market market" "foot foot";
-  column-gap:clamp(34px,5vw,82px);align-items:start
-}
-#top{grid-area:nav;padding:0 0 19px;border:0;border-bottom:1px solid var(--line);min-height:46px}
-.brand-logo{color:#111!important;text-decoration:none}
-.brand-logo img{width:auto;height:31px;max-width:220px;object-fit:contain}
-#quickNav{display:flex;gap:26px}
-#quickNav a{color:#4b5563!important;font-size:12px;font-weight:600;text-decoration:none}
-#quickNav a:hover{color:#0870ba!important}
-.mobile-menu-btn{display:none!important}
-.hero{grid-area:hero;max-width:none;width:100%;padding:clamp(66px,9vw,126px) 0 56px;align-self:center}
-.hero:before,.hero:after{display:none!important}
-.eyebrow{font-size:11px;letter-spacing:1.6px;color:#0870ba}
-.hero h1{font-size:clamp(50px,6.2vw,88px);line-height:1.01;letter-spacing:-.065em;font-weight:650;color:#111;margin:18px 0 22px;max-width:680px}
-.hero p{font-size:16px;line-height:1.7;color:#6b7280;max-width:490px}
-.steps{gap:8px;margin-top:27px}
-.step{font-size:10px;letter-spacing:.35px;background:#f7f7f8;border:1px solid #e5e7eb;color:#6b7280;padding:8px 12px;box-shadow:none!important;transform:none!important}
-.step.active{background:#111;color:white;border-color:#111}
-#create{grid-area:app;display:grid;grid-template-columns:1fr;gap:14px;align-self:center;padding:42px 0 35px;min-width:0}
-#create>.panel{border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:clamp(20px,2.5vw,32px);box-shadow:0 14px 38px rgba(17,24,39,.07);backdrop-filter:none;animation:riseIn .7s both}
-#create>.panel:first-child{transform:rotate(-1.4deg);z-index:2}
-#create>.panel:nth-child(2){margin:-22px 0 0 32px;transform:rotate(1.2deg);width:calc(100% - 32px);z-index:1}
-#create>.panel:hover{transform:translateY(-3px) rotate(0);box-shadow:0 18px 44px rgba(17,24,39,.1)}
-.panel h2{font-size:20px;letter-spacing:-.6px;color:#111}
-.muted,.hero p{color:#6b7280}
-.mic-area{background:#f7f7f8;border:1px solid #e5e7eb;border-radius:14px;min-height:220px}
-.mic-area:before,.mic-area:after{display:none}
-.mic{background:linear-gradient(145deg,#1489cc,#075a9c);border:0;border-radius:25px;box-shadow:0 12px 25px rgba(8,112,186,.2);animation:floatMic 4.5s ease-in-out infinite}
-.mic:before{border-color:#0870ba28;box-shadow:0 0 0 8px #0870ba0b,0 0 0 17px #0870ba08}
-.mic-caption{color:#111}.hint{color:#6b7280}
-.soundwave i{background:#0870ba}
-.btn{border-radius:999px;font-size:12px;padding:12px 17px;box-shadow:none!important}
-.primary,.btn.generating{background:#0870ba;color:#fff}
-.primary:hover{background:#075d9b}
-.soft{background:#f3f4f6;color:#111;border:1px solid #e5e7eb}
-.outline{background:#fff;color:#0870ba;border:1px solid #cbd5e1}
-.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 5px 14px #11111112!important}
-.field label{color:#374151}
-.field input,.field textarea{background:#fff;border:1px solid #d1d5db;border-radius:10px;color:#111}
-.field input:focus,.field textarea:focus{border-color:#0870ba;box-shadow:0 0 0 3px #0870ba13}
-.preview-empty{background:#f7f7f8;border:1px dashed #d1d5db;border-radius:12px;color:#6b7280}
-.preview-empty strong{color:#111}
-.price{color:#0870ba}
-.linkbox{background:#f7f7f8;border:1px solid #e5e7eb;color:#374151}
-.notice{background:#f8fafc;border:1px solid #e5e7eb;color:#4b5563}
-.divider{background:#e5e7eb}
-.share-img{border:1px solid #e5e7eb;box-shadow:none}
-#market{grid-area:market;margin:38px calc(clamp(22px,5.2vw,84px)*-1) 0;padding:clamp(60px,8vw,108px) clamp(22px,5.2vw,84px);background:#f7f7f8}
-.dashboard-heading{max-width:1280px;margin:0 auto 26px;align-items:end}
-.dashboard-heading h2,.inventory-head h2{font-size:clamp(32px,4vw,52px);line-height:1.05;letter-spacing:-.055em;font-weight:620;color:#111}
-.dashboard-heading .eyebrow{color:#0870ba}
-.market-grid{max-width:1280px;margin:0 auto;gap:14px}
-.market-card,.inventory-panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:none}
-.market-card{padding:23px;transition:transform .25s,border-color .25s}
-.market-card:hover{transform:translateY(-4px);border-color:#cbd5e1;box-shadow:none}
-.market-card-top{color:#6b7280}
-.market-card-top b{background:#eff6ff;color:#0870ba}
-.market-card strong{color:#111;font-size:38px}
-.market-card p,.market-card small{color:#6b7280}
-.meter{background:#e5e7eb}.meter i{background:#0870ba}
-.balance-note{background:#eff6ff;color:#075b99}
-.inventory-panel{max-width:1280px;margin:18px auto 0;padding:26px}
-.inventory-head{align-items:center}
-.inventory-head h2{font-size:27px}
-.live-pill,.inventory-count{background:#eff6ff;border:1px solid #dbeafe;color:#075b99}
-.live-pill i{background:#0870ba;box-shadow:none}
-.activity-list{border-color:#e5e7eb}
-.activity-row{border-color:#e5e7eb}
-.activity-row b{color:#111}.activity-row small,.activity-row time{color:#6b7280}
-.activity-icon.in{background:#eff6ff;color:#0870ba}
-.activity-icon.out{background:#f3f4f6;color:#4b5563}
-.activity-footnote{color:#6b7280}
-#creators{
-  background:#111827;color:#fff;padding:56px clamp(22px,5.2vw,84px) 28px;
-  margin:0 calc(clamp(22px,5.2vw,84px)*-1);border:0
-}
-#creators .signature-heading{max-width:1280px;margin:0 auto 28px}
-#creators .signature-heading *{color:#fff}
-#creators .signature-heading p{color:#9ca3af}
-#creators .signature-grid{max-width:1280px;margin:0 auto}
-#creators .signature-card{background:#1f2937;border:1px solid #374151;border-radius:12px;box-shadow:none}
-#creators .signature-card *{color:#fff}
-footer{color:#9ca3af;border:0;background:#111827;text-align:left;padding:24px clamp(22px,5.2vw,84px) 35px;margin:0 calc(clamp(22px,5.2vw,84px)*-1)}
-footer a{color:#fff}
-#stockDialog .stock-dialog-card{background:#fff}
-@keyframes editorialReveal{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@media(min-width:1200px){
-  #create>.panel:first-child{margin-right:12px}
-  #create>.panel:nth-child(2){margin-left:54px;width:calc(100% - 54px)}
-}
-@media(max-width:900px){
-  .shell{grid-template-columns:1fr;grid-template-areas:"nav" "hero" "app" "market" "foot";padding:20px 20px 0}
-  .hero{padding:54px 0 8px}
-  .hero h1{font-size:clamp(48px,10vw,72px)}
-  #create{padding:18px 0 45px}
-  #create>.panel:first-child{transform:none}
-  #create>.panel:nth-child(2){margin:0;width:100%;transform:none}
-  #market{margin:0 -20px;padding:58px 20px}
-  #creators{margin:0 -20px;padding:48px 20px 24px}
-  footer{margin:0 -20px;padding:22px 20px 30px}
-}
-@media(max-width:640px){
-  #quickNav{gap:12px}
-  #quickNav a{font-size:11px}
-  .brand-logo img{max-width:170px;height:27px}
-  .market-grid{grid-template-columns:1fr}
-  .dashboard-heading,.inventory-head{align-items:flex-start;flex-direction:column}
-  .inventory-panel{padding:18px}
-  .activity-row{grid-template-columns:34px minmax(100px,1fr) auto;gap:8px}
-  .activity-row time{display:none}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
-}
-
-#quick-nav{display:flex;gap:26px}
-.market-dashboard{grid-area:market;margin:38px calc(clamp(22px,5.2vw,84px)*-1) 0;padding:clamp(60px,8vw,108px) clamp(22px,5.2vw,84px);background:#f7f7f8}
-.market-dashboard .dashboard-heading{max-width:1280px;margin:0 auto 26px;align-items:end}
-.market-dashboard .market-grid{max-width:1280px;margin:0 auto;gap:14px}
-.market-dashboard .inventory-panel{max-width:1280px;margin:18px auto 0;padding:26px}
-#creators .signature-card{background:#1f2937;border:1px solid #374151;border-radius:12px;box-shadow:none}
-#creators .signature-card .signature-image-wrap{background:transparent}
-#creators .signature-card span{color:#d1d5db}
-</style>
 </head>
 <body>
 <div class="ambient-visual" aria-hidden="true">
@@ -455,50 +316,41 @@ function updatePreview() {
 }
 ["title","price","description","category"].forEach(id => $(id).addEventListener("input", updatePreview));
 
-async function submitAudio(blob) {
-  setStatus("Uploading audio and creating your listing…");
+async function submitTranscript(transcript) {
+  setStatus("Creating your listing locally — no AI credits needed…");
   try {
-    const form = new FormData();
-    form.append("audio", blob, "recording.webm");
-    const response = await fetch("/api/transcribe", {method:"POST", body:form});
+    const response = await fetch("/api/listing/from-text", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({transcript})});
     const data = await response.json();
-    if (!response.ok) throw new Error(data.detail || "Audio processing failed.");
+    if (!response.ok) throw new Error(data.detail || "Could not understand the product and price.");
     showListing(data);
-  } catch (error) { setStatus(error.message + " You can try demo mode.", "error"); showToast(error.message,true); }
+    setStatus("Listing created in free mode. Please review the details.", "success");
+  } catch (error) { setStatus(error.message, "error"); showToast(error.message,true); }
 }
-
+let recognition = null;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 $("recordBtn").onclick = async () => {
   try {
-    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) throw new Error("Audio recording is not supported by this browser.");
-    stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    chunks = [];
-    recorder = new MediaRecorder(stream);
-    recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
-    recorder.onstop = () => {
-      stream.getTracks().forEach(track => track.stop());
-      $("recordBtn").classList.remove("recording");
-      $("recordBtn").innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="2.5" width="6" height="12" rx="3" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5M8.5 21.5h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
-      $("micCaption").textContent = "Recording finished";
-      $("micHint").textContent = "Processing your sentence…";
-      submitAudio(new Blob(chunks, {type: recorder.mimeType || "audio/webm"}));
-    };
-    recorder.start();
-    $("recordBtn").classList.add("recording");
-    $("recordBtn").innerHTML = "■";
-    $("micCaption").textContent = "Recording…";
-    $("micHint").textContent = "Speak clearly, then tap Stop.";
-    $("recordBtn").disabled = true;
-    $("stopBtn").disabled = false;
-    setStatus("Recording. Speak your product and its exact price.");
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = "en-US"; recognition.interimResults = false; recognition.maxAlternatives = 1;
+      recognition.onstart = () => { $("recordBtn").classList.add("recording"); $("recordBtn").textContent = "●"; $("micCaption").textContent = "Listening…"; $("micHint").textContent = "Say what you sell and its exact price."; $("stopBtn").disabled = false; setStatus("Listening with your browser's speech recognition — no OpenAI API required."); };
+      recognition.onresult = event => { const transcript = event.results[0][0].transcript; $("micCaption").textContent = "Recording finished"; $("micHint").textContent = "Processing your sentence…"; submitTranscript(transcript); };
+      recognition.onerror = event => { setStatus("Speech recognition: " + event.error + ". You can use Try demo instead or enter a listing manually.", "error"); $("micCaption").textContent = "Speech recognition unavailable"; };
+      recognition.onend = () => { $("recordBtn").classList.remove("recording"); $("recordBtn").innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="2.5" width="6" height="12" rx="3" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5M8.5 21.5h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'; $("stopBtn").disabled = true; };
+      recognition.start();
+      return;
+    }
+    throw new Error("This browser does not support built-in speech recognition. Use Try demo or type your listing below.");
   } catch (error) { setStatus(error.message, "error"); }
 };
-$("stopBtn").onclick = () => {
-  if (recorder?.state === "recording") {
-    recorder.stop();
-    $("stopBtn").disabled = true;
-    $("recordBtn").disabled = false;
-  }
-};
+$("stopBtn").onclick = () => { if (recognition) { recognition.stop(); $("stopBtn").disabled = true; } };
+// Manual entry fallback is available even on browsers without SpeechRecognition.
+const manualBox = document.createElement("div");
+manualBox.style.cssText = "margin:14px 0;padding:14px;border:1px solid #cfe5f5;border-radius:16px;background:#f4faff";
+manualBox.innerHTML = '<label for="freeTranscript" style="display:block;font-weight:700;margin-bottom:8px;color:#145080">Or type your product sentence (free)</label><input id="freeTranscript" type="text" maxlength="240" placeholder="I sell handmade candles for 15 dollars" style="width:100%;padding:13px;border:1px solid #c8dff0;border-radius:10px;box-sizing:border-box"><button type="button" id="freeCreate" class="btn outline" style="margin-top:10px;width:100%">Create listing for free</button>';
+const demoButton = $("demoBtn"); demoButton.parentElement.insertBefore(manualBox, demoButton);
+$("freeCreate").onclick = () => submitTranscript($("freeTranscript").value);
+
 $("demoBtn").onclick = async () => {
   const button = $("demoBtn"); let demoDone = false; setBusy(button, true, "Loading demo…");
   try {

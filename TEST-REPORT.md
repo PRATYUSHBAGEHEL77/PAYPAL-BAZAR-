@@ -1,20 +1,23 @@
-# Verification report
+# Free Build — Local Verification Report
 
-## Passed locally
-- `python -m py_compile app/main.py`
-- `node --check` on the inline frontend JavaScript
-- HTML DOM lookup audit: 43 JavaScript ID references, 0 missing IDs, 0 duplicate IDs
-- FastAPI TestClient: `/`, `/api/health`, `/api/demo`
-- Demo listing creation and status retrieval
-- QR share card returns a valid PNG (Pillow fallback exercised because local Chromium was unavailable)
-- Demo payment capture updates and persists status
-- Inventory check-in and check-out persist; insufficient-stock checkout returns HTTP 409
-- Listing data reloads from SQLite after simulated application reinitialization
+Tested in a local Python TestClient environment with a temporary SQLite database.
 
-## Not verified in this environment
-- OpenAI transcription, extraction, translation, and TTS: requires a valid `OPENAI_API_KEY`
-- PayPal order creation, buyer approval, capture, and webhook signature verification: requires valid PayPal Sandbox credentials and configured webhook
-- Actual browser microphone permission and cross-device UI behavior: requires browser/device testing
-- Playwright Chromium screenshot renderer: local Chromium binary was not installed; Pillow fallback was verified instead
+- Python compilation: PASS
+- Frontend JavaScript syntax (`node --check`): PASS
+- Homepage route: PASS (HTTP 200)
+- Health endpoint: PASS (HTTP 200)
+- Demo listing endpoint: PASS (HTTP 200)
+- Local transcript parser for `I sell handmade soy candles for fifteen dollars each.`: PASS; extracted title and USD 15.00
+- Listing creation in demo mode: PASS
+- Local PNG share-card generation: PASS (HTTP 200, image/png)
+- Inventory check-in: PASS
+- Inventory check-out: PASS
+- Insufficient-stock rejection: PASS (HTTP 409)
 
-This is an integration-tested demo build, not a guarantee of production readiness. Keep PayPal in Sandbox until the unverified items are tested.
+Not tested / not claimed as passing:
+- Actual browser microphone permissions and Web Speech Recognition on every device/browser
+- Render deployment itself
+- PayPal Sandbox credentials, approval, capture, or webhook delivery
+- Durable database persistence on Render Free (not provided by its ephemeral filesystem)
+
+This is a free-mode demo build, not a production payment platform. Demo checkout is simulated and no money moves.

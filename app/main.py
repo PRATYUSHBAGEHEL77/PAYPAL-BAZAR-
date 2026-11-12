@@ -9,10 +9,12 @@ from fastapi.responses import HTMLResponse, Response, StreamingResponse, Redirec
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except Exception:
+    OpenAI = None
 import httpx
 import qrcode
-from playwright.async_api import async_playwright
 
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent
@@ -30,7 +32,8 @@ PAYPAL_ENV = os.getenv("PAYPAL_ENV", "sandbox").lower()
 PAYPAL_BASE = "https://api-m.paypal.com" if PAYPAL_ENV == "live" else "https://api-m.sandbox.paypal.com"
 DATABASE_PATH = os.getenv("DATABASE_PATH", "/var/data/voice_bazaar.db" if os.path.isdir("/var/data") else str(BASE_DIR.parent / "data" / "voice_bazaar.db"))
 DEMO_MODE = os.getenv("DEMO_MODE", "true").lower() == "true"
-client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+FREE_MODE = os.getenv("FREE_MODE", "true").lower() == "true"
+client = OpenAI(api_key=OPENAI_API_KEY) if (OPENAI_API_KEY and OpenAI) else None
 
 # SQLite persistence. On Render, mount a persistent disk at /var/data.
 listings: dict[str, dict] = {}
@@ -163,7 +166,7 @@ async def home():
 @app.get("/api/health")
 async def health():
     return {"ok": True, "demo_mode": DEMO_MODE, "openai_configured": bool(OPENAI_API_KEY),
-            "paypal_configured": bool(PAYPAL_CLIENT_ID and PAYPAL_SECRET), "paypal_environment": PAYPAL_ENV, "database": "sqlite", "database_configured": bool(DATABASE_PATH)}
+            "free_mode": FREE_MODE, "paypal_configured": bool(PAYPAL_CLIENT_ID and PAYPAL_SECRET), "paypal_environment": PAYPAL_ENV, "database": "sqlite", "database_configured": bool(DATABASE_PATH)}
 
 @app.get("/api/demo")
 async def demo():
@@ -172,6 +175,41 @@ async def demo():
             "description":"Bring a warm, calming glow to your favorite space. Hand-poured with care for a cozy everyday moment.",
             "price_usd":"15.00","category":"Home & Handmade","language":"en",
             "transcript":DEMO_TRANSCRIPT,"error":None,"demo":True}
+
+def local_listing_from_text(transcript: str):
+    """No-API listing helper. Uses browser speech recognition transcript + deterministic parsing."""
+    import re
+    raw = " ".join((transcript or "").strip().split())
+    if not raw:
+        raise HTTPException(400, "Please say or type what you are selling and its price.")
+    # Find numeric prices or common English number words.
+    number_words = {"one":"1", "two":"2", "three":"3", "four":"4", "five":"5", "six":"6", "seven":"7", "eight":"8", "nine":"9", "ten":"10", "eleven":"11", "twelve":"12", "thirteen":"13", "fourteen":"14", "fifteen":"15", "sixteen":"16", "seventeen":"17", "eighteen":"18", "nineteen":"19", "twenty":"20", "thirty":"30", "forty":"40", "fifty":"50", "sixty":"60", "seventy":"70", "eighty":"80", "ninety":"90", "hundred":"100"}
+    text = raw.lower()
+    price = None
+    m = re.search(r"(?:\$|usd\s*)\s*(\d+(?:\.\d{1,2})?)", text)
+    if not m:
+        m = re.search(r"\b(\d+(?:\.\d{1,2})?)\s*(?:dollars?|usd)\b", text)
+    if m:
+        price = m.group(1)
+    else:
+        m = re.search(r"\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\s*(?:dollars?|usd)\b", text)
+        if m: price = number_words[m.group(1)]
+    if not price:
+        raise HTTPException(400, "I couldn't find an exact price. Say, for example: I sell handmade candles for 15 dollars.")
+    # Remove seller-introduction and price phrases to create a readable title.
+    title = re.sub(r"^(i\s+)?(sell|make|offer|have|selling)\s+", "", raw, flags=re.I)
+    title = re.sub(r"\s+(?:for|at)\s+(?:\$?\s*)?(?:\d+(?:\.\d{1,2})?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)(?:\s*(?:dollars?|usd))?.*$", "", title, flags=re.I)
+    title = re.sub(r"\s+(?:each|per item)$", "", title, flags=re.I).strip(" .,!?")
+    title = title[:90].strip().capitalize()
+    if not title:
+        raise HTTPException(400, "Please include a product name, for example: I sell handmade soy candles for 15 dollars.")
+    category = "Handmade" if any(w in title.lower() for w in ("handmade", "craft", "candle", "soap", "art")) else "General"
+    return {"title": title, "description": f"Discover {title.lower()}, prepared with care for everyday use. A thoughtful find from an independent seller.", "price_usd": f"{parse_price(price):.2f}", "category": category, "language": "en", "transcript": raw, "error": None, "free_mode": True}
+
+@app.post("/api/listing/from-text")
+async def listing_from_text(request: Request):
+    body = await request.json()
+    return local_listing_from_text(str(body.get("transcript", "")))
 
 @app.post("/api/transcribe")
 async def transcribe(audio: UploadFile = File(...)):
@@ -271,46 +309,37 @@ async def share_card(listing_id: str):
     <p style="font-size:23px;line-height:1.4;color:#52627a">{clean(item['description'])}</p></div>
     <div style="text-align:center"><img width="190" height="190" src="data:image/png;base64,{qr_b64}">
     <div style="font-size:21px;font-weight:bold;margin-top:12px">Pay with PayPal</div></div></div></div></body></html>"""
-    try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch()
-            page = await browser.new_page(viewport={"width":900,"height":520}, device_scale_factor=2)
-            await page.set_content(page_html, wait_until="load")
-            png = await page.locator("body > div").screenshot(type="png")
-            await browser.close()
-    except Exception:
-        # Pillow fallback keeps share-card generation available even if Chromium
-        # is temporarily unavailable on a local/dev host.
-        from PIL import Image, ImageDraw, ImageFont
-        canvas = Image.new("RGB", (1200, 700), "#f2f8fd")
-        draw = ImageDraw.Draw(canvas)
-        draw.rounded_rectangle((35, 35, 1165, 665), radius=36, fill="white", outline="#d8e9f8", width=3)
-        def load_font(size, bold=False):
-            candidates = [
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
-            ]
-            for candidate in candidates:
-                if os.path.exists(candidate): return ImageFont.truetype(candidate, size)
-            return ImageFont.load_default()
-        draw.text((85, 85), "PAYPAL VOICE BAZAAR", fill="#0875b9", font=load_font(28, True))
-        title = item["title"][:46]
-        draw.text((85, 190), title, fill="#092f60", font=load_font(48, True))
-        draw.text((85, 285), f"${item['price']} USD", fill="#0875b9", font=load_font(54, True))
-        description = item["description"][:155]
-        words, lines, line = description.split(), [], ""
-        for word in words:
-            trial = (line + " " + word).strip()
-            if draw.textlength(trial, font=load_font(23)) > 650 and line:
-                lines.append(line); line = word
-            else: line = trial
-        if line: lines.append(line)
-        for index, line in enumerate(lines[:4]):
-            draw.text((85, 390 + index * 38), line, fill="#526b83", font=load_font(23))
-        qr_image = qrcode.make(item["approval_url"]).convert("RGB").resize((270, 270))
-        canvas.paste(qr_image, (830, 205))
-        draw.text((850, 500), "PAY WITH PAYPAL", fill="#0875b9", font=load_font(23, True))
-        output = io.BytesIO(); canvas.save(output, format="PNG", optimize=True); png = output.getvalue()
+    # Pillow creates the share card without a headless browser or paid service.
+    from PIL import Image, ImageDraw, ImageFont
+    canvas = Image.new("RGB", (1200, 700), "#f2f8fd")
+    draw = ImageDraw.Draw(canvas)
+    draw.rounded_rectangle((35, 35, 1165, 665), radius=36, fill="white", outline="#d8e9f8", width=3)
+    def load_font(size, bold=False):
+        candidates = [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+        ]
+        for candidate in candidates:
+            if os.path.exists(candidate): return ImageFont.truetype(candidate, size)
+        return ImageFont.load_default()
+    draw.text((85, 85), "PAYPAL VOICE BAZAAR", fill="#0875b9", font=load_font(28, True))
+    title = item["title"][:46]
+    draw.text((85, 190), title, fill="#092f60", font=load_font(48, True))
+    draw.text((85, 285), f"${item['price']} USD", fill="#0875b9", font=load_font(54, True))
+    description = item["description"][:155]
+    words, lines, line = description.split(), [], ""
+    for word in words:
+        trial = (line + " " + word).strip()
+        if draw.textlength(trial, font=load_font(23)) > 650 and line:
+            lines.append(line); line = word
+        else: line = trial
+    if line: lines.append(line)
+    for index, line in enumerate(lines[:4]):
+        draw.text((85, 390 + index * 38), line, fill="#526b83", font=load_font(23))
+    qr_image = qrcode.make(item["approval_url"]).convert("RGB").resize((270, 270))
+    canvas.paste(qr_image, (830, 205))
+    draw.text((850, 500), "PAY WITH PAYPAL", fill="#0875b9", font=load_font(23, True))
+    output = io.BytesIO(); canvas.save(output, format="PNG", optimize=True); png = output.getvalue()
     return Response(png, media_type="image/png",
         headers={"Content-Disposition":'attachment; filename="voice-bazaar-card.png"'})
 

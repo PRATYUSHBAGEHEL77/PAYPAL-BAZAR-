@@ -1,80 +1,45 @@
-# PayPal Voice Bazaar — Full-stack project
+# PayPal Voice Bazaar — Free Demo Build
 
-A voice-first storefront for independent makers. Sellers speak a product and price, review an AI-generated listing, create a PayPal checkout link, and share a QR-enabled product card. The app also tracks stock check-ins/check-outs in SQLite and displays live payment notifications.
+A browser-based website (not an APK) with a FastAPI backend and SQLite database. This build is designed to run without OpenAI API credits.
 
-## Included
+## Free-mode behaviour
 
-- Responsive blue-and-white frontend with your supplied PayPal Voice Bazaar logo and transparent blue creator signatures.
-- FastAPI backend with health, demo, transcription, listing confirmation, checkout, capture, share-card, inventory and webhook endpoints.
-- SQLite database for listings, payment status, webhook event deduplication, inventory balances and inventory activity.
-- OpenAI Whisper transcription, GPT listing extraction, translated payment notifications and text-to-speech.
-- PayPal Orders v2 integration using Sandbox by default.
-- Safe simulated checkout when PayPal credentials are not configured and `DEMO_MODE=true`.
-- QR-code share cards and server-sent events for live seller updates.
+- Voice input uses the browser's built-in Web Speech Recognition when supported (Chrome/Edge support varies by platform and may use the browser vendor's speech service; it does not use your OpenAI API key).
+- If speech recognition is unavailable, type a sentence into the free manual-entry field.
+- Product name and price are extracted locally with deterministic rules. This is not an LLM and supports straightforward English phrases such as: `I sell handmade soy candles for fifteen dollars each.`
+- Read-back uses the browser's built-in SpeechSynthesis.
+- Demo checkout is simulated. It does not charge a buyer or move money.
+- QR share cards are generated locally with Pillow and qrcode.
+- Inventory check-in/check-out uses SQLite and prevents stock from going below zero.
+- OpenAI and Playwright are not required for the free demo.
 
 ## Run locally
 
-Requires Python 3.11+.
-
 ```bash
 python -m venv .venv
-# Windows: .venv\\Scripts\\activate
+# Windows: .venv\Scripts\activate
 # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-playwright install chromium
-cp .env.example .env
 uvicorn app.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000`. The demo listing and simulated checkout work without API credentials. AI transcription/listing/TTS require `OPENAI_API_KEY`. Real PayPal Sandbox checkout requires `PAYPAL_CLIENT_ID` and `PAYPAL_SECRET`.
+Open `http://127.0.0.1:8000`.
 
-## PayPal setup
+## Deploy on Render Free
 
-1. Create a REST app in the PayPal Developer Dashboard and copy its **Sandbox** client ID and secret into `.env`.
-2. Keep `PAYPAL_ENV=sandbox` while testing.
-3. Add a webhook at `https://YOUR-RENDER-DOMAIN/api/webhook` for `PAYMENT.CAPTURE.COMPLETED` and set `PAYPAL_WEBHOOK_ID` to the webhook ID.
-4. Test with PayPal Sandbox buyer and seller accounts.
-5. Only switch `PAYPAL_ENV=live` after reviewing PayPal's live integration requirements and adding live credentials. Never commit secrets.
+1. Push the contents of this folder to the root of a GitHub repository.
+2. In Render choose **New + → Blueprint**, connect the repository, and apply `render.yaml`.
+3. Select the Free web service plan if prompted.
+4. No OpenAI variables or PayPal credentials are required for the free demo.
 
-## Deploy on Render
+### Important free-tier limitations
 
-1. Upload the contents of this repository to the **root** of a GitHub repository. `render.yaml` must be at the repository root.
-2. In Render choose **New + → Blueprint**, connect the repository and apply the Blueprint.
-3. Add `OPENAI_API_KEY`, `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, and `PAYPAL_WEBHOOK_ID` in the Render environment settings. Leave PayPal in Sandbox for testing.
-4. The Blueprint mounts a persistent disk at `/var/data` for the SQLite database. Persistent disks are a paid Render feature; if your plan does not support disks, use a managed PostgreSQL database and migrate the persistence layer before relying on production data.
-5. Wait for `/api/health` to report `ok: true`.
+Render Free web services have an ephemeral filesystem and can spin down when idle. This build stores SQLite at `/tmp/voice_bazaar.db`, so listings/inventory may be lost after a restart, redeploy, or instance replacement. For durable production data, connect an external database with a free allowance or use a paid persistent disk/database plan. Do not use this ephemeral database for real customer records.
 
-## API overview
+### Payments
 
-- `GET /api/health` — service and integration configuration.
-- `GET /api/demo` — sample listing (no API key needed).
-- `POST /api/transcribe` — multipart audio upload; transcribe and extract listing.
-- `POST /api/confirm` — create a PayPal order or safe demo checkout.
-- `GET /demo-checkout/{listing_id}` and `POST /demo-checkout/{listing_id}/complete` — simulated checkout only.
-- `GET /api/card/{listing_id}.png` — QR share card.
-- `POST /api/capture` — capture an approved Sandbox order.
-- `GET /api/events/{listing_id}` — SSE seller notification stream.
-- `POST /api/webhook` — verified PayPal webhook receiver.
-- `GET /api/inventory` and `POST /api/inventory` — persistent stock history and balances.
-- `GET /api/status/{listing_id}` — current payment state.
+Without PayPal Sandbox credentials, the app creates a clearly-labelled simulated checkout only. To test actual PayPal Sandbox payments, configure `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_ENV=sandbox`, and a webhook ID. Sandbox testing does not charge real money, but PayPal account setup and availability apply. Never enable live payments without full security and end-to-end testing.
 
-## Important notes
+### Voice support
 
-- This is a hackathon-ready reference implementation, not a payment-platform certification or a production compliance guarantee. Test every flow in Sandbox before any live use.
-- The UI's demand percentage cards are illustrative demo indicators, not live market research or a real-time marketplace feed.
-- Inventory updates are persisted, and check-out is rejected if stock would become negative.
-- SQLite works for a single app instance. For multi-instance scaling, use managed PostgreSQL and a shared event broker; in-process SSE listeners are local to the running process.
-- Configure a persistent Render disk or external database to retain data across deploys/restarts. Do not rely on an ephemeral filesystem for business records.
-- Keep API credentials in Render environment variables or local `.env`; never put them in frontend code or GitHub.
-- Browser microphone access requires HTTPS (Render provides it) or localhost.
-
-## Verification performed for this package revision
-
-The following offline checks were run after repairing the missing `contextmanager` import and making static/database paths independent of the launch working directory:
-
-- Python bytecode compilation for `app/main.py`.
-- JavaScript syntax validation with `node --check`.
-- DOM reference audit: all 43 JavaScript ID lookups resolve; no duplicate HTML IDs were found.
-- FastAPI integration checks with credentials disabled: health, homepage, demo listing, listing creation, payment status, demo capture, QR card PNG generation, inventory check-in/check-out, insufficient-stock rejection, and listing persistence after reinitializing the database.
-
-External OpenAI and PayPal transactions cannot be verified without valid API credentials. The browser microphone permission/recording flow and actual PayPal buyer approval/webhook delivery still need a live browser + Sandbox test. Do not enable live payments until those tests pass.
+Browser speech recognition requires a supported browser and microphone permission, normally over HTTPS. If it is unavailable, use the manual sentence field. This free build does not promise offline speech recognition or AI-quality multilingual extraction.
